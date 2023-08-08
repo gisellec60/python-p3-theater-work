@@ -2,9 +2,7 @@
 
 from faker import Faker
 import random
-
 from random import choice as rc
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -31,9 +29,10 @@ def create_auditions():
            hired=fake.boolean(chance_of_getting_true=50),
         )
         session.add(audition)   
-        session.commit  
+        session.commit()  
         auditions.append(audition) 
-    
+    return auditions    
+        
 def create_roles():
     roles = []
     for i in range (5):
@@ -41,11 +40,20 @@ def create_roles():
             character_name = fake.name()
         )
         session.add(role)
-        session.commit
+        session.commit()
         roles.append(role)
-    
+    return roles
+
+def relate_one_to_many(roles, auditions):
+    for audition in auditions:
+        audition.role = rc(roles)
+
+    session.add_all(auditions)  
+    session.commit()  
+    return roles, auditions   
+
 if __name__ == '__main__':
     delete_records()
-    create_auditions()
-    create_roles()
-    
+    auditions = create_auditions()
+    roles = create_roles()
+    roles, auditions = relate_one_to_many(roles, auditions)
